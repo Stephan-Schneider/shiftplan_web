@@ -3,6 +3,7 @@ import Validity from "@/components/createplan_sfc/Validity.vue";
 import Policy from "@/components/createplan_sfc/Policy.vue";
 import Employees from "@/components/createplan_sfc/Employees.vue";
 
+import {getData} from "@/assets/js/requests.js";
 import {employeeConfigEquals, objectEquals} from "@/assets/js/utilities.js";
 
 function createLabelMap() {
@@ -13,86 +14,16 @@ function createLabelMap() {
     return map;
 }
 
-function loadConfig() {
-    /*
-    In fertigen Zustand wird die Konfiguration durch einen Ajax-Aufruf geladen. Wenn beim Laden der Konfiguration ein
-    Problem auftritt, im catch - Block ein Rumpf-Konfigurations-Objekt erstellen und zurückgeben:
-        {
-            validity: {},
-            policy: {},
-            employees: []
+async function loadConfig() {
+    return getData("/description").then(result => {
+        if (result.errorMessage) {
+            console.log(`Fehlermeldung: ${result.errorMessage}`)
+            // show errorMessage
+        } else {
+            console.log(`Schichtplan-Objekt: ${JSON.stringify(result)}`)
+            return result;
         }
-     */
-    return {
-            validity: {
-                year: 2025,
-                startDate: 6,
-                endDate: 12,
-                publicHolidays: [
-                    {
-                        name: "Neujahr",
-                        date: "2024-01-01"
-                    },
-                    {
-                        name: "Karfreitag",
-                        date: "2024-03-29"
-                    },
-                    {
-                        name: "Ostermontag",
-                        date: "2024-04-01"
-                    }
-                ]
-            },
-            policy: {
-                lateshiftPeriod: 4,
-                maxHoDaysPerMonth: 10,
-                weeklyHoCreditsPerEmployee: 3,
-                maxHoSlotsPerDay: 3,
-                maxSuccessiveHoDays: 2,
-                minDistanceBetweenHoBlocks: 2,
-                noLateshiftOn: [
-                    "MONDAY", "TUESDAY"
-                ]
-            },
-            employees: [
-                {
-                    id: "ID-1",
-                    name: "Rudi",
-                    lastName: "Ratlos",
-                    participation: "HO_LS",
-                    email: "rudi.ratlos@gmx.de",
-                    color: "#88ddff",
-                    backups: ["ID-2", "ID-3"]
-                },
-                {
-                    id: "ID-2",
-                    name: "Tommi",
-                    lastName: "Tulpe",
-                    participation: "HO_LS",
-                    email: "tommi.tulpe@gmx.de",
-                    color: "#00ffaa",
-                    backups: ["ID-1", "ID-3"]
-                },
-                {
-                    id: "ID-3",
-                    name: "Hola",
-                    lastName: "Hurtig",
-                    participation: "HO",
-                    email: "hola.hurtig@gmx.de",
-                    color: "#003399",
-                    backups: ["ID-1", "ID-2"]
-                },
-                {
-                    id: "ID-4",
-                    name: "Mia",
-                    lastName: "Maus",
-                    participation: "LS",
-                    email: "mia.maus@gmx.de",
-                    color: "#ee3333",
-                    backups: []
-                },
-            ]
-        }
+    })
 }
 
 export default {
@@ -125,7 +56,7 @@ export default {
             const {section, ...sectionRemoved} = partConfig;
             let configChanged = false;
             if (partConfigName === "Employees") {
-                configChanged = !employeeConfigEquals(this.shiftPlanConfig.employees, partConfig.employees);
+                configChanged = !employeeConfigEquals(this.shiftPlanConfig.employees.employeeList, partConfig.employees);
             } else {
                 configChanged = !objectEquals(this.shiftPlanConfig[partConfigName.toLowerCase()], sectionRemoved);
             }
@@ -140,7 +71,7 @@ export default {
                 this.updatesPolicy +=1;
                 this.policyIsUpdate = true;
             } else if (partConfigName  === "Employees" && configChanged) {
-                this.shiftPlanConfig.employees = partConfig.employees;
+                this.shiftPlanConfig.employees.employeeList = partConfig.employees;
                 this.updatesEmployees +=1;
                 this.employeesIsUpdate = true;
             }
@@ -148,9 +79,9 @@ export default {
         }
     },
     computed: {
-        currentConfig() {
+        async currentConfig() {
             if (this.shiftPlanConfig === null) {
-                this.shiftPlanConfig = loadConfig();
+                this.shiftPlanConfig = await loadConfig();
             }
 
             if (this.currentTab === "Validity") {
@@ -158,7 +89,7 @@ export default {
             } else if (this.currentTab === "Policy") {
                 return this.shiftPlanConfig.policy;
             } else if (this.currentTab === "Employees") {
-                return  this.shiftPlanConfig.employees;
+                return this.shiftPlanConfig.employees;
             }
         }
     }

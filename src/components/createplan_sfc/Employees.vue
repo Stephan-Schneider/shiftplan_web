@@ -12,10 +12,12 @@ const idMap = new Map();
 function deepCopyOfConfig(config) {
     if (config === undefined || config === null) {
         return [];
-    } else if (!Array.isArray(config)) {
+    } else if (config.employeeList === undefined || config.employeeList === null) {
+        return [];
+    } else if (!Array.isArray(config.employeeList)) {
         return [];
     } else {
-        return JSON.parse(JSON.stringify(config));
+        return JSON.parse(JSON.stringify(config.employeeList));
     }
 }
 
@@ -23,7 +25,7 @@ export default {
     name: "Employees",
     emits: ["updateConfig"],
     props: {
-        config: Array,
+        config: Object,
         required: true
     },
     data() {

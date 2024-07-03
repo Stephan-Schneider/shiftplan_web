@@ -48,11 +48,11 @@ let serverResponseDigiDates = `{
     "2024-12-26": "2. Weihnachtstag"
 }`;
 
-test("get PublicHolidayHandler instance", () => {
+test("getData PublicHolidayHandler instance", () => {
     expect(getPublicHolidays("Feiertage_API", 2024, "HE")).toBeInstanceOf(PublicHolidayHandler)
 });
 
-test("get PublicHolidaysDigiDatesAPIHandler", () => {
+test("getData PublicHolidaysDigiDatesAPIHandler", () => {
     expect(getPublicHolidays("DigiDates", 2024, "BW")).toBeInstanceOf(PublicHolidaysDigiDatesAPIHandler)
 });
 
@@ -66,7 +66,7 @@ test("tests the correct URL creation for DigiDates-API", () => {
     expect(phHandler.createRequestUrl()).toEqual("https://digidates.de/api/v1/germanpublicholidays?year=2024&region=de-sl");
 })
 
-test("get response from Feiertage-API", () => {
+test("getData response from Feiertage-API", () => {
     const phHandler = getPublicHolidays("Feiertage_API", 2024, "HE");
     phHandler.requestPublicHolidays().then(result => {
         expect(result).toBeInstanceOf(Array);

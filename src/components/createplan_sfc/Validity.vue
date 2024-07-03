@@ -82,13 +82,11 @@ export default {
         updateConfig() {
             this.$emit("updateConfig", {
                 section: "Validity",
-                //changed: this.configChanged,
                 year: this.year,
                 startDate: this.monthFrom,
                 endDate: this.monthTo,
                 publicHolidays: this.publicHolidays
             });
-            //this.configChanged = false;
         }
     },
     computed: {
@@ -100,30 +98,8 @@ export default {
                 (ph1, ph2) => new Date(ph1.date).getTime() - new Date(ph2.date).getTime());
         }
     },
-    /*watch: {
-        year(newValue, oldValue) {
-            if (newValue !== oldValue) {
-                this.configChanged = true;
-            }
-        },
-        monthFrom(newValue, oldValue) {
-            if (newValue !== oldValue) {
-                this.configChanged = true;
-            }
-        },
-        monthTo(newValue, oldValue) {
-            if (newValue !== oldValue) {
-                this.configChanged = true;
-            }
-        },
-        publicHolidays(newValue, oldValue) {
-            if (newValue-length !== oldValue.length) {
-                this.configChanged = true;
-            }
-        }
-    },*/
     mounted() {
-        console.log(this.config);
+        console.log(`Validity (this.config) in Validity#mounted: ${JSON.stringify(this.config)}`);
     }
 }
 </script>

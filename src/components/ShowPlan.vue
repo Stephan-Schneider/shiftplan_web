@@ -5,6 +5,8 @@ export default {
 </script>
 
 <template>
+    <h1>ShowPlan !</h1>
+    <a href="generated/test.html" target="_blank">Schichtplan</a>
 
 </template>
 
