@@ -1,4 +1,6 @@
 <script>
+import {mapState, mapWritableState, mapActions} from "pinia";
+import {useEmployeesStore} from "@/assets/stores/employees.js";
 
 import {
     getNextId,
@@ -7,27 +9,9 @@ import {
     difference, syncBackupsOnUpdate
 } from "@/assets/js/utilities.js";
 
-const idMap = new Map();
-
-function deepCopyOfConfig(config) {
-    if (config === undefined || config === null) {
-        return [];
-    } else if (config.employeeList === undefined || config.employeeList === null) {
-        return [];
-    } else if (!Array.isArray(config.employeeList)) {
-        return [];
-    } else {
-        return JSON.parse(JSON.stringify(config.employeeList));
-    }
-}
-
 export default {
     name: "Employees",
     emits: ["updateConfig"],
-    props: {
-        config: Object,
-        required: true
-    },
     data() {
         return {
             name: "",
@@ -39,10 +23,15 @@ export default {
             selectedBackups: [],
             selectedEmployeeId: "",
             nameFieldsDisabled: false,
-            employees: deepCopyOfConfig(this.config)
+            idMap: new Map()
         }
     },
     methods: {
+        ...mapActions(useEmployeesStore, {
+            addEmp: "addEmployee",
+            findEmployee: "findEmployee",
+            loadEmployeeConfig: "loadEmployeeConfig"
+        }),
         deleteBackup(evt) {
             if (evt.key === "Delete") {
                 let textBox = this.$refs.textarea;
@@ -59,7 +48,7 @@ export default {
             }
         },
         resolveEmployeeId(empId) {
-            return idMap.get(empId);
+            return this.idMap.get(empId);
         },
         addEmployee() {
             if (this.selectedEmployeeId !== "") return; // MA existiert schon, kann nur geändert oder gelöscht werden
@@ -75,18 +64,18 @@ export default {
                 backups: this.selectedBackups.map(empObj => empObj.empId)
             }
 
-            idMap.set(employee.id, `${employee.name} ${employee.lastName}`)
+            this.idMap.set(employee.id, `${employee.name} ${employee.lastName}`)
 
             if (employee.backups.length > 0) {
                 this.employees = syncBackupsOnCreation(employee, this.employees);
             }
 
-            this.employees.push(employee);
+            this.addEmp(employee);
 
             this.resetEmployeeForm();
         },
         updateEmployee() {
-            const selectedEmployee = this.employees.find(employee => employee.id === this.selectedEmployeeId);
+            const selectedEmployee = this.findEmployee(this.selectedEmployeeId);
             if (selectedEmployee === null || selectedEmployee === undefined) return;
 
             if (this.name === "" || this.lastName === "") {
@@ -112,7 +101,7 @@ export default {
             this.resetEmployeeForm();
         },
         deleteEmployee() {
-            const selectedEmployee = this.employees.find(employee => employee.id === this.selectedEmployeeId);
+            const selectedEmployee = this.findEmployee(this.selectedEmployeeId);
             if (selectedEmployee === null || selectedEmployee === undefined) return;
 
             // Das reaktive Property 'this.employees' nicht sofort updaten - erst den gelöschten MA aus den
@@ -122,7 +111,7 @@ export default {
             // Jetzt updaten - die geänderten Backup-Listen sollten jetzt auch angezeigt werden
             this.employees = syncBackupsOnDeletion(selectedEmployee, temp);
 
-            idMap.delete(selectedEmployee.id);
+            this.idMap.delete(selectedEmployee.id);
 
             this.resetEmployeeForm();
         },
@@ -136,7 +125,7 @@ export default {
             this.participation = employee.participation;
             this.color = employee.color;
             this.selectedBackups = employee.backups.map(buId => {
-                return {empId: buId, employee: idMap.get(buId)}
+                return {empId: buId, employee: this.idMap.get(buId)}
             });
         },
         resetEmployeeForm() {
@@ -157,6 +146,8 @@ export default {
         }
     },
     computed: {
+        ...mapState(useEmployeesStore, ["employees"]),
+        ...mapWritableState(useEmployeesStore, ["employees"]),
         selectedBackupsText() {
             return this.selectedBackups.map(empObj => empObj.employee).join("\n");
         }
@@ -165,7 +156,7 @@ export default {
         backup(empId) {
             if (empId !== "" && empId !== this.selectedEmployeeId) {
                 console.log(`newVal: ${empId}`)
-                let employee = idMap.get(empId);
+                let employee = this.idMap.get(empId);
                 console.log(`selected employee: ${employee}`)
                 if (employee && !this.selectedBackups.map(empObj => empObj.empId).includes(empId)) {
                     this.selectedBackups.push({empId: empId, employee: employee});
@@ -173,12 +164,12 @@ export default {
             }
         }
     },
-    created() {
+    async created() {
+        await this.loadEmployeeConfig();
         if (this.employees && this.employees.length > 0) {
-            this.employees.forEach(emp => idMap.set(emp.id, `${emp.name} ${emp.lastName}`));
+            this.employees.forEach(emp => this.idMap.set(emp.id, `${emp.name} ${emp.lastName}`));
         }
-        console.log(`ID-Map: ${idMap.size}`)
-
+        console.log(`ID-Map: ${this.idMap.size}`);
     }
 }
 </script>

@@ -1,5 +1,5 @@
 import {expect, test} from "@jest/globals";
-import {getPublicHolidays, PublicHolidayHandler, PublicHolidaysDigiDatesAPIHandler} from "../src/assets/js/holidays.js"
+import {getPublicHolidayHandler, PublicHolidayHandler, PublicHolidaysDigiDatesAPIHandler} from "../src/assets/js/holidays.js"
 
 let serverResponse = `{
     "Neujahrstag": {
@@ -49,25 +49,25 @@ let serverResponseDigiDates = `{
 }`;
 
 test("getData PublicHolidayHandler instance", () => {
-    expect(getPublicHolidays("Feiertage_API", 2024, "HE")).toBeInstanceOf(PublicHolidayHandler)
+    expect(getPublicHolidayHandler("Feiertage_API", 2024, "HE")).toBeInstanceOf(PublicHolidayHandler)
 });
 
 test("getData PublicHolidaysDigiDatesAPIHandler", () => {
-    expect(getPublicHolidays("DigiDates", 2024, "BW")).toBeInstanceOf(PublicHolidaysDigiDatesAPIHandler)
+    expect(getPublicHolidayHandler("DigiDates", 2024, "BW")).toBeInstanceOf(PublicHolidaysDigiDatesAPIHandler)
 });
 
 test("tests the correct URL creation for Feiertage-API", () => {
-    const phHandler = getPublicHolidays("Feiertage_API", 2024, "HH");
+    const phHandler = getPublicHolidayHandler("Feiertage_API", 2024, "HH");
     expect(phHandler.createRequestUrl()).toEqual("https://feiertage-api.de/api/?jahr=2024&nur_land=HH");
 });
 
 test("tests the correct URL creation for DigiDates-API", () => {
-    const phHandler = getPublicHolidays("DigiDates", 2024,"SL");
+    const phHandler = getPublicHolidayHandler("DigiDates", 2024,"SL");
     expect(phHandler.createRequestUrl()).toEqual("https://digidates.de/api/v1/germanpublicholidays?year=2024&region=de-sl");
 })
 
 test("getData response from Feiertage-API", () => {
-    const phHandler = getPublicHolidays("Feiertage_API", 2024, "HE");
+    const phHandler = getPublicHolidayHandler("Feiertage_API", 2024, "HE");
     phHandler.requestPublicHolidays().then(result => {
         expect(result).toBeInstanceOf(Array);
     })
@@ -75,7 +75,7 @@ test("getData response from Feiertage-API", () => {
 
 test("test processResponse with Feiertage_API", () => {
     const input = JSON.parse(serverResponse);
-    const phHandler = getPublicHolidays("Feiertage_API", 2024, "BW");
+    const phHandler = getPublicHolidayHandler("Feiertage_API", 2024, "BW");
     const result = phHandler.processResponse(input);
     expect(result).toHaveLength(8);
     expect(result[0].name).toEqual("Neujahrstag");
@@ -84,7 +84,7 @@ test("test processResponse with Feiertage_API", () => {
 
 test("test processResponse with DigiDates", () => {
     const input = JSON.parse(serverResponseDigiDates);
-    const phHandler = getPublicHolidays("DigiDates", 2024,"HE");
+    const phHandler = getPublicHolidayHandler("DigiDates", 2024,"HE");
     const result = phHandler.processResponse(input);
     expect(result).toHaveLength(9);
     expect(result[0].name).toEqual("Neujahr");

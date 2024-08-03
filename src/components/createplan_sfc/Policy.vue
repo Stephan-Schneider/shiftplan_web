@@ -1,29 +1,15 @@
 <script>
-//import {arrayEquals} from "@/assets/js/utilities.js"
+import {mapActions, mapState, mapWritableState} from "pinia";
+import {usePolicyStore} from "@/assets/stores/policy.js";
+
 export default {
     name: "Policy",
     emits: ["updateConfig"],
-    props: {
-        config: Object,
-        required: true
-    },
-    data() {
-        return {
-            lateshiftPeriod: this.config.lateshiftPeriod ? this.config.lateshiftPeriod : 4,
-            noLateshiftOn: this.config.noLateshiftOn ? [...this.config.noLateshiftOn] : [],
-            maxHoSlots: this.config.maxHoSlotsPerDay ? this.config.maxHoSlotsPerDay : 2,
-            maxHoPerMonth: this.config.maxHoDaysPerMonth ? this.config.maxHoDaysPerMonth : 8,
-            maxHoPerWeekEmployee: this.config.weeklyHoCreditsPerEmployee ? this.config.weeklyHoCreditsPerEmployee : 2,
-            maxSuccessiveHoDays: this.config.maxSuccessiveHoDays ? this.config.maxSuccessiveHoDays : 2,
-            minDistanceBetweenHoBlocks: this.config.minDistanceBetweenHoBlocks ? this.config.minDistanceBetweenHoBlocks : 2,
-            //configChanged: false
-        }
-    },
     methods: {
+        ...mapActions(usePolicyStore, {loadPolicyConfig: "loadPolicyConfig"}),
         updateConfig() {
             this.$emit("updateConfig", {
                 section: "Policy",
-                //changed: this.configChanged,
                 lateshiftPeriod: this.lateshiftPeriod,
                 maxHoDaysPerMonth: this.maxHoPerMonth,
                 weeklyHoCreditsPerEmployee: this.maxHoPerWeekEmployee,
@@ -32,34 +18,19 @@ export default {
                 minDistanceBetweenHoBlocks: this.minDistanceBetweenHoBlocks,
                 noLateshiftOn: this.noLateshiftOn
             });
-            //this.configChanged = false;
         }
     },
-    /*watch: {
-        lateshiftPeriod(newValue, oldValue) {
-            this.configChanged = newValue !== oldValue;
-        },
-        noLateshiftOn(newValue, oldValue) {
-            this.configChanged = arrayEquals(newValue, oldValue);
-        },
-        maxHoSlots(newValue, oldValue) {
-            this.configChanged = newValue !== oldValue;
-        },
-        maxHoPerMonth(newValue, oldValue) {
-            this.configChanged = newValue !== oldValue;
-        },
-        maxHoPerWeekEmployee(newValue, oldValue) {
-            this.configChanged = newValue !== oldValue;
-        },
-        maxSuccessiveHoDays(newValue, oldValue) {
-            this.configChanged = newValue !== oldValue;
-        },
-        minDistanceBetweenHoBlocks(newValue, oldValue) {
-            this.configChanged = newValue !== oldValue;
-        }
-    },*/
-    mounted() {
-        console.log(this.config);
+    computed: {
+        ...mapState(usePolicyStore,
+            ["lateshiftPeriod", "maxHoPerMonth", "maxHoPerWeekEmployee", "maxHoSlots", "maxSuccessiveHoDays",
+                "minDistanceBetweenHoBlocks", "noLateshiftOn", "error"]),
+        ...mapWritableState(usePolicyStore,
+            ["lateshiftPeriod", "maxHoPerMonth", "maxHoPerWeekEmployee", "maxHoSlots", "maxSuccessiveHoDays",
+                "minDistanceBetweenHoBlocks", "noLateshiftOn", "error"]
+        )
+    },
+    created() {
+        this.loadPolicyConfig();
     }
 }
 </script>
@@ -175,6 +146,9 @@ export default {
     </div>
     <div class="row mt-2">
         <div class="col-8">
+            <div class="row">
+                <p class="error" v-if="error">{{error.errorMessage}}</p>
+            </div>
             <div class="row bg-light">
                 <div class="col-12 btn-center">
                     <button
@@ -198,5 +172,10 @@ p.header {
 }
 div.btn-center {
     text-align: center;
+}
+.error {
+    color: darkred;
+    font-size: smaller;
+    font-weight: bold;
 }
 </style>

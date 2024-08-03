@@ -107,7 +107,7 @@ class PublicHolidaysDigiDatesAPIHandler extends PublicHolidayHandler{
 const feiertage_api_url = "https://feiertage-api.de/api/";
 const digiDates_api_url = "https://digidates.de/api/v1/germanpublicholidays";
 
-function getPublicHolidays(api, year, state) {
+function getPublicHolidayHandler(api, year, state) {
     if (api === "Feiertage_API") {
         return new PublicHolidayHandler(feiertage_api_url, year, state);
     } else if (api === "DigiDates") {
@@ -115,5 +115,5 @@ function getPublicHolidays(api, year, state) {
     }
 }
 
-export { getPublicHolidays, PublicHolidayHandler, PublicHolidaysDigiDatesAPIHandler };
+export { getPublicHolidayHandler, PublicHolidayHandler, PublicHolidaysDigiDatesAPIHandler };
 

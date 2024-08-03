@@ -1,19 +1,13 @@
 <script>
-import {getPublicHolidays} from "@/assets/js/holidays.js";
+import {mapActions, mapState, mapWritableState} from "pinia";
+
+import {useValidityStore} from "@/assets/stores/validity.js";
 
 export default {
     name: "Validity",
     emits: ["updateConfig"],
-    props: {
-        config: Object,
-        required: true
-    },
     data() {
         return {
-            year: this.config.year === undefined ? new Date().getFullYear() : this.config.year,
-            monthFrom: this.config.startDate === undefined ? 1 : this.config.startDate,
-            monthTo: this.config.endDate === undefined ? 12 : this.config.endDate,
-            publicHolidays: this.config.publicHolidays === undefined ? [] : [...this.config.publicHolidays],
             holidayName: "",
             holidayDate: null,
             monthOptions: [
@@ -34,10 +28,18 @@ export default {
             holidayDateHasError: false,
             api: "Feiertage_API",
             region: "HE",
-            //configChanged: false
         }
     },
     methods: {
+        ...mapActions(useValidityStore,
+            {
+                isUnique: "isUnique",
+                addHD: "addHD",
+                removeHD: "removeHD",
+                removeAllHD: "removeAllHD",
+                getPublicHolidays: "getPublicHolidays",
+                loadValidityConfig: "loadValidityConfig"
+            }),
         addHoliday() {
             if (this.holidayName === "") {
                 this.holidayNameHasError = true;
@@ -49,35 +51,31 @@ export default {
                 return;
             }
             this.holidayDateHasError = false;
+            const year = this.year;
+
             // Sicher stellen, dass das Jahr des eingegebenen Datums mit dem für den Schichtplan ausgewähltem
             // Jahr übereinstimmt (es ist also nicht möglich, z.B. einen Feiertag im Jahr 2025 manuell einzugeben,
             // wenn ein Schichtplan für 2024 erstellt wird).
-            let hd = this.year + "-" + this.holidayDate.substring(this.holidayDate.indexOf("-") +1);
-            if (!this.publicHolidays.some(elem => elem.name.toLowerCase() === this.holidayName.toLowerCase())) {
-                this.publicHolidays.push({name: this.holidayName, date: hd});
+            let hd = year + "-" + this.holidayDate.substring(this.holidayDate.indexOf("-") +1);
+            // Auf Duplikat überprüfen (jeder Feiertag darf innerhalb eines Jahres nur 1 x vorkommen)
+            if (this.isUnique(this.holidayName)) {
+                this.addHD({name: this.holidayName, date: hd});
             }
             this.holidayName = "";
             this.holidayDate = null;
         },
         removeHoliday(index) {
-            this.publicHolidays.splice(index, 1);
+            this.removeHD(index);
         },
         removeAllHolidays() {
-            this.publicHolidays.splice(0, this.publicHolidays.length);
+            this.removeAllHD();
         },
         resetHolidayInputFields() {
             this.holidayName = "";
             this.holidayDate = null;
         },
         getPublicHolidaysFromAPI() {
-            const handler = getPublicHolidays(this.api, this.year, this.region);
-            handler.requestPublicHolidays().then(result => {
-                console.log(result);
-                if (result.errorMessage) {
-                    // Handle error
-                }
-                this.publicHolidays = result;
-            })
+            this.getPublicHolidays(this.api, this.region);
         },
         updateConfig() {
             this.$emit("updateConfig", {
@@ -90,17 +88,19 @@ export default {
         }
     },
     computed: {
+        //...mapStores(useValidityStore), // state (data)
+        ...mapState(useValidityStore,
+            ["year", "monthFrom", "monthTo", "publicHolidays", "sortedHolidays", "error"]), // state + getters
+        ...mapWritableState(useValidityStore,
+            ["year", "monthFrom", "monthTo", "publicHolidays", "error"]),
         currentYear() {
             return new Date().getFullYear();
-        },
-        sortedHolidays() {
-            return this.publicHolidays.sort(
-                (ph1, ph2) => new Date(ph1.date).getTime() - new Date(ph2.date).getTime());
         }
     },
-    mounted() {
-        console.log(`Validity (this.config) in Validity#mounted: ${JSON.stringify(this.config)}`);
+    created() {
+        this.loadValidityConfig();
     }
+
 }
 </script>
 
@@ -231,6 +231,7 @@ export default {
                         </li>
                     </ul>
                 </div>
+                <p class="error" v-if="error">{{ error.errorMessage }}</p>
             </div>
         </div>
     </div>
@@ -255,6 +256,11 @@ p.ph-header {
 }
 .invalid {
     border: 1px solid darkred;
+}
+.error {
+    color: darkred;
+    font-size: smaller;
+    font-weight: bold;
 }
 
 </style>
