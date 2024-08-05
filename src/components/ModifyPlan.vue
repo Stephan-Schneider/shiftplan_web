@@ -15,13 +15,17 @@ export default {
             loadStafflist: "loadStafflist",
             modifyPlan: "modifyPlan"
         }),
-        getLateShiftsOfA(staffId) {
+        getLateShiftsOfA(evt) {
+            const staffId = evt.target.value;
+            console.log(`Selected Staff-ID (A): ${staffId}`)
             // noinspection JSUnresolvedVariable
-            this.lateShiftsOfA = this.idMap.get(staffId).cwIndices;
+            this.lateShiftsOfA = this.idMap.get(staffId)?.cwIndices;
         },
-        getLateShiftsOfB(staffId) {
+        getLateShiftsOfB(evt) {
+            const staffId = evt.target.value;
+            console.log(`Selected Staff-ID (B): ${staffId}`)
             // noinspection JSUnresolvedVariable
-            this.lateShiftsOfB = this.idMap.get(staffId).cwIndices;
+            this.lateShiftsOfB = this.idMap.get(staffId)?.cwIndices;
         },
         async modifyShiftplan() {
             await this.modifyPlan();
@@ -75,12 +79,15 @@ export default {
             <h2>Spätschichten Mitarbeiter/in A</h2>
             <div class="row">
                 <div class="col-4">
-                    <select class="form-select form-select-sm" v-model="employeeA">
+                    <select
+                        class="form-select form-select-sm"
+                        v-model="employeeA"
+                        v-on:change="getLateShiftsOfA"
+                    >
                         <option value="">Mitarbeiter A auswählen</option>
                         <option
                             v-for="staff in staffList"
                             :key="staff.id"
-                            @click="getLateShiftsOfA(staff.id)"
                             :value="staff.id"
                         >{{ staff.displayName }}
                         </option>
@@ -105,12 +112,15 @@ export default {
             <h2>Spätschichten Mitarbeiter/in B</h2>
             <div class="row">
                 <div class="col-4">
-                    <select class="form-select form-select-sm" v-model="employeeB">
+                    <select
+                        class="form-select form-select-sm"
+                        v-model="employeeB"
+                        v-on:change="getLateShiftsOfB"
+                    >
                         <option value="">Mitarbeiter B auswählen</option>
                         <option
                             v-for="staff in staffList"
                             :key="staff.id"
-                            @click="getLateShiftsOfB(staff.id)"
                             :value="staff.id"
                         >{{ staff.displayName }}
                         </option>

@@ -1,5 +1,6 @@
 <script>
 import {mapState, mapWritableState, mapActions} from "pinia";
+import draggable from "vuedraggable";
 import {useEmployeesStore} from "@/assets/stores/employees.js";
 
 import {
@@ -11,6 +12,7 @@ import {
 
 export default {
     name: "Employees",
+    components: {draggable},
     emits: ["updateConfig"],
     data() {
         return {
@@ -344,7 +346,7 @@ export default {
         <div class="col-4">
             <p class="fw-bold text-decoration-underline">Konfigurierte Mitarbeiter und Mitarbeiterinnen</p>
             <div class="scroll-box">
-                <ul>
+                <!--<ul>
                     <li v-for="employee in employees" :key="employee.id">
                         <a
                             href="#"
@@ -359,7 +361,25 @@ export default {
                             </template>
                         </ul>
                     </li>
-                </ul>
+                </ul>-->
+                <draggable :list="employees" item-key="id" tag="ul">
+                    <template #item="{element}">
+                        <li>
+                            <a
+                                href="#"
+                                @click.prevent="displaySelectedEmployee(element)"
+                            >{{ element.name }} {{ element.lastName }}</a>
+                            <ul>
+                                <template v-for="(backup, index) in element.backups">
+                                    <li>
+                                        <span class="fst-italic">Backup {{ index +1 }}:</span>
+                                        {{ resolveEmployeeId(backup) }}
+                                    </li>
+                                </template>
+                            </ul>
+                        </li>
+                    </template>
+                </draggable>
             </div>
         </div>
     </div>

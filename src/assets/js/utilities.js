@@ -116,6 +116,19 @@ export function employeeConfigEquals(loadedEmployees, processedEmployees) {
         return idOrderA - idOrderB;
     }
 
+    const sameOrder = (idsA, idsB) => {
+        const joinedA = idsA.join('');
+        const joinedB = idsB.join('');
+        return joinedA === joinedB;
+    }
+
+    // Die Reihenfolge der Auflistung der einzelnen Mitarbeiter kann vom Benutzer geändert werden. Die
+    // Reihenfolge, in welcher die Mitarbeiter in shiftplan.json oder shiftplan.xml aufgeführt sind, spiegelt
+    // sich dann im erstellten Schichtplan.
+    const isSameOrder =
+        sameOrder(loadedEmployees.map(emp => emp.id), processedEmployees.map(emp => emp.id));
+    if (!isSameOrder) return false;
+
     const sortedA = loadedEmployees.toSorted(sortFunc);
     const sortedB = processedEmployees.toSorted(sortFunc);
 

@@ -19,7 +19,7 @@ export default {
             currentPath: window.location.hash,
             username: "",
             password: "",
-            showApp: true,
+            showApp: false,
             failedLoginMsg: ""
         }
     },
