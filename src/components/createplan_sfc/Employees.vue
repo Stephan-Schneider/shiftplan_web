@@ -243,7 +243,7 @@ export default {
                             class="form-check-input"
                             v-model="participation"
                         >
-                        <label for="ho" class="form-check-label">Home</label>
+                        <label for="ho" class="form-check-label small">Home</label>
                     </div>
                     <div class="form-check form-check-inline">
                         <input
@@ -254,7 +254,7 @@ export default {
                             class="form-check-input"
                             v-model="participation"
                         >
-                        <label for="ls" class="form-check-label">Spät</label>
+                        <label for="ls" class="form-check-label small">Spät</label>
                     </div>
                     <div class="form-check form-check-inline">
                         <input
@@ -265,7 +265,7 @@ export default {
                             class="form-check-input"
                             v-model="participation"
                         >
-                        <label for="ho-ls" class="form-check-label">Home + Spät</label>
+                        <label for="ho-ls" class="form-check-label small">Home + Spät</label>
                     </div>
                 </div>
             </div>
@@ -346,22 +346,6 @@ export default {
         <div class="col-4">
             <p class="fw-bold text-decoration-underline">Konfigurierte Mitarbeiter und Mitarbeiterinnen</p>
             <div class="scroll-box">
-                <!--<ul>
-                    <li v-for="employee in employees" :key="employee.id">
-                        <a
-                            href="#"
-                            @click.prevent="displaySelectedEmployee(employee)"
-                        >{{ employee.name }} {{ employee.lastName }}</a>
-                        <ul>
-                            <template v-for="(backup, index) in employee.backups">
-                                <li>
-                                    <span class="fst-italic">Backup {{ index +1 }}:</span>
-                                    {{ resolveEmployeeId(backup) }}
-                                </li>
-                            </template>
-                        </ul>
-                    </li>
-                </ul>-->
                 <draggable :list="employees" item-key="id" tag="ul">
                     <template #item="{element}">
                         <li>
@@ -424,6 +408,10 @@ a {
 
 a:hover {
     text-decoration: underline;
+}
+
+label.small {
+    font-size: 0.8em;
 }
 
 </style>

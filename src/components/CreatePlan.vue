@@ -35,7 +35,8 @@ export default {
             validityIsUpdate: false,
             policyIsUpdate: false,
             employeesIsUpdate: false,
-            message: ""
+            message: "",
+            urlParam: "false"
         }
     },
     methods: {
@@ -52,6 +53,8 @@ export default {
 
             if (partConfigName === "Validity" && configChanged) {
                 // Die Konfiguration nur abändern + 'updateValidity' hochzählen, wenn Änderungen durchgeführt wurden
+                this.urlParam = Boolean(sectionRemoved.clearShiftplanCopy).toString();
+                delete sectionRemoved.clearShiftplanCopy;
                 shiftPlanConfig.validity = sectionRemoved;
                 this.updatesValidity += 1;
                 this.validityIsUpdate = true;
@@ -67,7 +70,7 @@ export default {
             console.log(shiftPlanConfig);
         },
         async saveShiftplan() {
-            const result = await postData("/create", getCachedData());
+            const result = await postData(`/create/${this.urlParam}`, getCachedData());
             if (result.errorMessage) {
                 this.message = result.errorMessage
             } else {
@@ -82,11 +85,15 @@ export default {
                 this.employeesIsUpdate = false;
             }
             setTimeout(() => {
-                this.message = ""
+                this.message = "";
             }, 10000);
         },
         deleteCache() {
             invalidateCache();
+            this.message = "Speicher gelöscht (Tab wechseln, um Konfigurationsdaten erneut vom Server zu laden).";
+            setTimeout(() => {
+                this.message = "";
+            }, 10000);
         }
     }
 }
@@ -112,20 +119,25 @@ export default {
                 :class="[employeesIsUpdate ? updateClass : noUpdateClass]"
             >Update Mitarbeiter: <span>{{ updatesEmployees }}</span></p>
         </div>
-        <div class="col-2">
+        <div class="col-6 btn-group" role="group">
             <button
                 type="button"
-                class="btn btn-outline-primary btn-sm m-2"
+                class="btn btn-outline-primary btn-sm m-2 small-font"
                 @click="saveShiftplan"
             >Konfiguration speichern</button>
-        </div>
-        <div class="col-2">
             <button
                 type="button"
-                class="btn btn-outline-primary btn-sm m-2"
+                class="btn btn-outline-primary btn-sm m-2 small-font"
                 @click="deleteCache"
             >Cache-Daten löschen</button>
         </div>
+        <!--<div class="col-3">
+            <button
+                type="button"
+                class="btn btn-outline-primary btn-sm m-2 small-font"
+                @click="deleteCache"
+            >Cache-Daten löschen</button>
+        </div>-->
     </div>
     <div class="row">
         <p class="feedback" v-if="message">{{ message }}</p>
@@ -162,6 +174,9 @@ p.no-update {
 p.with-update {
     color: #678c43;
     font-weight: bold;
+    font-size: 0.8em;
+}
+button.small-font {
     font-size: 0.8em;
 }
 p.feedback {

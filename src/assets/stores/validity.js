@@ -8,6 +8,8 @@ export const useValidityStore = defineStore("validity", {
             year: new Date().getFullYear(),
             monthFrom: 1,
             monthTo: 12,
+            boundaryStrict: false,
+            clearShiftplanCopy: false,
             publicHolidays: [],
             error: null
         }
@@ -61,6 +63,7 @@ export const useValidityStore = defineStore("validity", {
                 this.year = result.year ? result.year : new Date().getFullYear();
                 this.monthFrom  = result.startDate ? result.startDate : 1;
                 this.monthTo = result.endDate ? result.endDate : 12;
+                this.boundaryStrict = result.boundaryStrict ? result.boundaryStrict : false;
                 this.publicHolidays = Array.isArray(result.publicHolidays) ? [...result.publicHolidays] : [];
             }
         }

@@ -27,7 +27,7 @@ export default {
             holidayNameHasError: false,
             holidayDateHasError: false,
             api: "Feiertage_API",
-            region: "HE",
+            region: "HE"
         }
     },
     methods: {
@@ -83,6 +83,8 @@ export default {
                 year: this.year,
                 startDate: this.monthFrom,
                 endDate: this.monthTo,
+                boundaryStrict: this.boundaryStrict,
+                clearShiftplanCopy: this.clearShiftplanCopy,
                 publicHolidays: this.publicHolidays
             });
         }
@@ -90,17 +92,20 @@ export default {
     computed: {
         //...mapStores(useValidityStore), // state (data)
         ...mapState(useValidityStore,
-            ["year", "monthFrom", "monthTo", "publicHolidays", "sortedHolidays", "error"]), // state + getters
+            ["year", "monthFrom", "monthTo", "boundaryStrict", "clearShiftplanCopy", "publicHolidays", "sortedHolidays", "error"]), // state + getters
         ...mapWritableState(useValidityStore,
-            ["year", "monthFrom", "monthTo", "publicHolidays", "error"]),
+            ["year", "monthFrom", "monthTo", "boundaryStrict", "clearShiftplanCopy", "publicHolidays", "error"]),
         currentYear() {
             return new Date().getFullYear();
+        },
+        clearShiftplanCopyDisabled() {
+            return !!this.boundaryStrict;
+
         }
     },
     created() {
         this.loadValidityConfig();
     }
-
 }
 </script>
 
@@ -127,6 +132,28 @@ export default {
                     {{ month }}
                 </option>
             </select>
+        </div>
+        <div class="col-2"></div>
+        <div class="col-4 mt-1 border border-dark">
+            <div class="form-check">
+                <input
+                    type="checkbox"
+                    id="mode-strict"
+                    class="form-check-input"
+                    v-model="boundaryStrict"
+                >
+                <label for="mode-strict" class="form-check-label small">Plan beginnt immer exakt am 01. des Monats</label>
+            </div>
+            <div class="form-check">
+                <input
+                    type="checkbox"
+                    id="clear-config"
+                    class="form-check-input"
+                    v-model="clearShiftplanCopy"
+                    :disabled="clearShiftplanCopyDisabled"
+                >
+                <label for="clear-config" class="form-check-label small">Alten Schichtplan löschen</label>
+            </div>
         </div>
     </div>
 
@@ -227,7 +254,7 @@ export default {
                                     class="btn btn-outline-danger mr-1"
                                     style="--bs-btn-padding-y: 0.15rem; --bs-btn-padding-x: 0.2rem; --bs-btn-font-size: .75rem"
                             >Löschen</button>
-                            &nbsp<span>{{ item.name }}: {{ item.date}}</span>
+                            &nbsp<span class="small">{{ item.name }}: {{ item.date}}</span>
                         </li>
                     </ul>
                 </div>
@@ -260,6 +287,11 @@ p.ph-header {
 .error {
     color: darkred;
     font-size: smaller;
+    font-weight: bold;
+}
+
+.small {
+    font-size: 0.8em;
     font-weight: bold;
 }
 
