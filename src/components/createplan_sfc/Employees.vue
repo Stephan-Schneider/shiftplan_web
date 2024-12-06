@@ -224,6 +224,7 @@ export default {
                         id="e-mail"
                         class="form-control form-control-sm"
                         autocomplete="off"
+                        disabled
                         placeholder="Email (zum Versenden des Schichtplans)"
                         v-model="email"
                     >
